@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub OAuth Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen bg-slate-900 flex items-center justify-center text-slate-100"
+  >
+    <div
+      id="userBadge"
+      class="hidden absolute top-4 right-4 flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-lg shadow"
+    >
+      <img id="avatar" class="w-8 h-8 rounded-full" />
+      <div class="text-sm">
+        <div id="name" class="font-medium"></div>
+        <div class="text-slate-400 text-xs">Logged in</div>
+      </div>
+    </div>
+
+    <div
+      class="w-full max-w-md bg-slate-800 rounded-xl shadow-xl p-8 space-y-6"
+    >
+      <div class="text-center space-y-2">
+        <h1 class="text-2xl font-semibold">Sign in</h1>
+        <p class="text-slate-400 text-sm">
+          Authenticate using your GitHub account
+        </p>
+      </div>
+
+      <a
+        id="authBtn"
+        href="/oauth/github/login"
+        class="flex items-center justify-center gap-3 w-full rounded-lg bg-slate-100 text-slate-900 font-medium py-3 hover:bg-white transition"
+      >
+        <svg height="20" viewBox="0 0 16 16" width="20" fill="currentColor">
+          <path
+            d="M8 0C3.58 0 0 3.65 0 8.15c0 3.6 2.29 6.65 5.47 7.73.4.08.55-.18.55-.39 0-.19-.01-.82-.01-1.49-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.52-.01-.53.63-.01 1.08.6 1.23.85.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.92-3.64-4.07 0-.9.31-1.64.82-2.22-.08-.21-.36-1.05.08-2.18 0 0 .67-.22 2.2.85a7.4 7.4 0 0 1 4 0c1.53-1.07 2.2-.85 2.2-.85.44 1.13.16 1.97.08 2.18.51.58.82 1.31.82 2.22 0 3.16-1.87 3.86-3.65 4.07.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.47.55.39A8.03 8.03 0 0 0 16 8.15C16 3.65 12.42 0 8 0z"
+          />
+        </svg>
+        <span id="authText">Continue with GitHub</span>
+      </a>
+
+
+      <p class="text-xs text-center text-slate-500">
+        Uses GitHub OAuth · No password stored
+      </p>
+    </div>
+   <script>
+    const authBtn = document.getElementById("authBtn");
+    const authText = document.getElementById("authText");
+    const userBadge = document.getElementById("userBadge");
+    const avatar = document.getElementById("avatar");
+    const nameEl = document.getElementById("name");
+
+    async function loadUser() {
+      try {
+        const res = await fetch("/api/user", { credentials: "include" });
+        if (!res.ok) return;
+
+        const user = await res.json();
+
+        avatar.src = user.avatar;
+        nameEl.textContent = user.name;
+        userBadge.classList.remove("hidden");
+
+        authText.textContent = "Disconnect GitHub";
+        authBtn.href = "#";
+        authBtn.classList.remove("bg-slate-100", "text-slate-900", "hover:bg-white");
+        authBtn.classList.add("bg-red-600", "text-white", "hover:bg-red-700");
+
+        authBtn.onclick = async (e) => {
+          e.preventDefault();
+          await fetch("/logout", { method: "POST", credentials: "include" });
+          location.reload();
+        };
+
+      } catch {}
+    }
+
+    loadUser();
+    </script>
+
+
+</html>
