@@ -32,8 +32,8 @@ func exchangeCode(code string, cfg config.Config) (string, error) {
 }
 
 func fetchGitHubUser(token string) (User, error) {
-	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
-	req.Header.Set("Authorization", "Bearer "+token)
+	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com/user", nil)
+	req.Header.Set("Authorization", "Bearer "+ token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
 	resp, err := http.DefaultClient.Do(req)
