@@ -7,7 +7,7 @@ import (
 	"github.com/vinitngr/go-oauth-server/internals/auth"
 	"github.com/vinitngr/go-oauth-server/internals/config"
 	"github.com/vinitngr/go-oauth-server/internals/handlers"
-	"github.com/vinitngr/go-oauth-server/internals/handlers/webhooks"
+	"github.com/vinitngr/go-oauth-server/internals/handlers/webhook"
 	"github.com/vinitngr/go-oauth-server/internals/oauth"
 	// oauth "github.com/vinitngr/go-oauth-server/internals/oauth/github"
 )
@@ -32,14 +32,14 @@ func main() {
 		),
 	)
 
-	webhookReg := webhooks.NewWebhookRegistry()
-	mux.Handle("/webhook/", webhooks.NewWebhookHandler(webhookReg))
+	webhookReg := webhook.NewWebhookRegistry()
+	mux.Handle("/webhook/", webhook.NewWebhookHandler(webhookReg))
 
 	oauthReg := oauth.NewOauthRegistry(cfg)
 	handler := oauth.NewHandler(oauthReg)
 	mux.Handle("/oauth/connection/", handler)
 	mux.Handle("/oauth/callback/", handler)
 
-	log.Println("http://localhost:8080")
+	log.Println("https://8080.vinitngr.xyz")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

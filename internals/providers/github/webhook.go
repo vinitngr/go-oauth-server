@@ -1,9 +1,11 @@
-package webhooks
+package github
 
 import (
 	"io"
 	"net/http"
 	"net/url"
+
+	helpers "github.com/vinitngr/go-oauth-server/internals/handlers"
 )
 
 type GitHubWebhook struct{}
@@ -35,7 +37,7 @@ func (g *GitHubWebhook) Process(w http.ResponseWriter, r *http.Request) {
 		body = []byte(values.Get("payload"))
 	}
 
-	logWebhookLine("github", event)
+	helpers.LogWebhookLine("github", event)
 
 	w.WriteHeader(http.StatusOK)
 }

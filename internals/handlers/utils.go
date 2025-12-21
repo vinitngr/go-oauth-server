@@ -1,4 +1,4 @@
-package webhooks
+package handlers
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ func ParseJSON(body []byte) (map[string]any, error) {
 	return data, err
 }
 
-func logWebhookLine(provider, event string) {
+func LogWebhookLine(provider, event string) {
 	f, err := os.OpenFile(
 		"webhook.event.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
