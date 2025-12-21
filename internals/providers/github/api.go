@@ -1,4 +1,4 @@
-package oauth
+package github
 
 import (
 	"encoding/json"
@@ -8,30 +8,10 @@ import (
 	"strings"
 
 	"github.com/vinitngr/go-oauth-server/internals/config"
+	utils "github.com/vinitngr/go-oauth-server/internals/providers"
 )
 
-func exchangeCode(code string, cfg config.Config) (string, error) {
-	resp, err := http.Post(
-		"https://github.com/login/oauth/access_token",
-		"application/x-www-form-urlencoded",
-		strings.NewReader(url.Values{
-			"client_id":     {cfg.GithubClientID},
-			"client_secret": {cfg.GithubClientSecret},
-			"code":          {code},
-			"redirect_uri":  {cfg.GithubRedirectURI},
-		}.Encode()),
-	)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-	vals, _ := url.ParseQuery(string(body))
-	return vals.Get("access_token"), nil
-}
-
-func fetchGitHubUser(token string) (User, error) {
+func FetchGitHubUser(token string) (User, error) {
 	req, _ := http.NewRequest(http.MethodGet, "https://api.github.com/user", nil)
 	req.Header.Set("Authorization", "Bearer "+ token)
 	req.Header.Set("Accept", "application/vnd.github+json")
@@ -59,4 +39,27 @@ func fetchGitHubUser(token string) (User, error) {
 		Avatar:   raw.AvatarURL,
 		Email:    raw.Email,
 	}, nil
+}
+
+func ExchangeCode(code string, cfg config.Config) (string, error) {
+	resp, err := http.Post(
+		"https://github.com/login/oauth/access_token",
+		"application/x-www-form-urlencoded",
+		strings.NewReader(url.Values{
+			"client_id":     {cfg.GithubClientID},
+			"client_secret": {cfg.GithubClientSecret},
+			"code":          {code},
+			"redirect_uri":  {cfg.GithubRedirectURI},
+		}.Encode()),
+	)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	vals, _ := url.ParseQuery(string(body))
+
+	_ = utils.SaveToken("github", vals.Get("access_token"))
+	return vals.Get("access_token"), nil
 }

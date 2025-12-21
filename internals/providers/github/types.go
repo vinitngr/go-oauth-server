@@ -1,4 +1,4 @@
-package oauth
+package github
 
 type User struct {
 	GithubID int    `json:"github_id"`

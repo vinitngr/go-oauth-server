@@ -8,16 +8,14 @@ import (
 	"github.com/vinitngr/go-oauth-server/internals/config"
 	"github.com/vinitngr/go-oauth-server/internals/handlers"
 	"github.com/vinitngr/go-oauth-server/internals/handlers/webhooks"
-	oauth "github.com/vinitngr/go-oauth-server/internals/oauth/github"
+	"github.com/vinitngr/go-oauth-server/internals/oauth"
+	// oauth "github.com/vinitngr/go-oauth-server/internals/oauth/github"
 )
 
 func main() {
 	cfg := config.Load()
 
 	mux := http.NewServeMux()
-
-	mux.HandleFunc("/oauth/github/login", oauth.GithubLogin(cfg))
-	mux.HandleFunc("/oauth/github/callback", oauth.GithubCallback(cfg))
 
 	mux.Handle("/api/user",
 		auth.Middleware(cfg.JWTSecret)(
@@ -34,9 +32,14 @@ func main() {
 		),
 	)
 
-	reg := webhooks.NewWebhookRegistry()
+	webhookReg := webhooks.NewWebhookRegistry()
+	mux.Handle("/webhook/", webhooks.NewWebhookHandler(webhookReg))
 
-	mux.Handle("/webhook/" , webhooks.NewWebhookHandler(reg))
+	oauthReg := oauth.NewOauthRegistry(cfg)
+	handler := oauth.NewHandler(oauthReg)
+	mux.Handle("/oauth/connection/", handler)
+	mux.Handle("/oauth/callback/", handler)
+
 	log.Println("http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
